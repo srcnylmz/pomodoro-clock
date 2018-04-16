@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>A Simple Pomodoro Timer App</title>
+</head>
+<style>
+	* {
+		margin: 0;
+		padding: 0;
+		border: 0;
+		font-family: Helvetica;
+	}
+	.top {
+		display: flex;
+		justify-content: center;
+		font-size: 100px;
+		font-weight: bold;
+		height: 50vh;
+		background-color: #ddd;
+		border-bottom: 10px solid #eee;
+		color: #999;
+	}
+
+	.time {
+		align-self: center;
+	}
+
+	.settings {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		height: calc(50vh - 10px); /* .top class has a border of 10px */
+		background-color: #fff;
+	}
+
+	.buttons {
+		display: block;
+	}
+
+	button {
+		padding: 10px;
+		background-color: yellow;
+		width: 80px;
+		margin: 5px;
+		cursor: pointer;
+	}
+
+	button:hover {
+		padding: 10px;
+		background-color: red;
+		width: 80px;
+		margin: 5px;
+	}
+
+	.break, .session {
+		padding: 20px;
+		text-align: center;
+	}
+
+	.break > input, .session > input {
+		width: 80px;
+		height: 30px;
+		background-color: red;
+		font-size: 16px;
+		text-align: center;
+	}
+</style>
+<body>
+	<div class="top">
+		<div class="time">
+			<span id="mins">25</span>
+			:
+			<span id="secs">00</span>
+		</div>
+	</div>
+	<div class="settings">
+		<div class="break">
+			Break Time<br/>
+			<input type="number" maxlength="3" value="5" id="breakTime">
+		</div>
+		<div>
+			<span class="buttons">
+				<button type="button" id="startButton">Start</button>
+			</span>
+			<span class="buttons">
+				<button type="button" id="stopButton">Stop</button>
+			</span>
+		</div>
+		<div class="session">
+			Session Time<br/>
+			<input type="number" maxlength="3" value="25" id="sessionTime">
+		</div>
+	</div>
+	<script type="text/javascript">
+		
+		// declaring variables
+		let running = 0;
+		let startButton = document.getElementById("startButton");
+		let stopButton = document.getElementById("stopButton");
+		let session = {mins: 25, secs: 0};
+		let rest = {mins: 5, secs: 0};
+
+
+		startButton.addEventListener("click", startPomodoro);
+		stopButton.addEventListener("click", stopPomodoro);
+
+		stopButton.style.display = "none";
+		stopButton.disabled = true;
+
+
+		function startPomodoro() {
+			
+			startCountdown = setInterval(startSession, 1000);
+			let sessionTime = document.getElementById("sessionTime").value;
+			let pomodoroTime = sessionTime * 60;
+			startButton.style.display = "none";
+			startButton.disabled = true;
+
+			stopButton.style.display = "block";
+			stopButton.disabled = false;
+
+			function startSession() {
+
+				session.mins = Math.floor(pomodoroTime / 60);
+				session.secs = Math.floor(pomodoroTime - session.mins * 60);
+				
+				document.getElementById("mins").innerHTML = (session.mins < 10 ? '0' : '') + session.mins;
+				document.getElementById("secs").innerHTML = (session.secs < 10 ? '0' : '') + session.secs;
+
+				pomodoroTime--;
+
+				if (pomodoroTime < 0) {
+
+					clearInterval(startCountdown);
+
+					startBreakCountdown = setInterval(startBreak, 1000);
+					let breakTime = document.getElementById("breakTime").value;
+					let pomodoroBreakTime = breakTime * 60;
+
+					function startBreak() {
+
+						rest.mins = Math.floor(pomodoroBreakTime / 60);
+						rest.secs = Math.floor(pomodoroBreakTime - rest.mins * 60);
+						
+						document.getElementById("mins").innerHTML = (rest.mins < 10 ? '0' : '') + rest.mins;
+						document.getElementById("secs").innerHTML = (rest.secs < 10 ? '0' : '') + rest.secs;
+
+						pomodoroBreakTime--;
+						
+						if (pomodoroBreakTime < 0) {
+
+							clearInterval(startBreakCountdown);
+							startButton.style.display = "block";
+							startButton.disabled = false;
+
+							stopButton.style.display = "none";
+							stopButton.disabled = true;
+
+						}
+
+					}
+				}
+			}
+
+		}
+
+		function stopPomodoro() {
+
+			clearInterval(startCountdown);
+			if (typeof startBreakCountdown !== 'undefined') {
+				clearInterval(startBreakCountdown);
+			}
+
+			document.getElementById("mins").innerHTML = (document.getElementById("sessionTime").value < 10 ? '0' : '') + document.getElementById("sessionTime").value;
+			document.getElementById("secs").innerHTML = "00";
+
+			startButton.style.display = "block";
+			startButton.disabled = false;
+
+			stopButton.style.display = "none";
+			stopButton.disabled = true;
+
+		}
+	</script>
+</body>
+</html>
